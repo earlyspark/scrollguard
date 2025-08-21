@@ -80,6 +80,40 @@ gradle wrapper --gradle-version 8.9
 ./gradlew externalNativeBuildDebug --info
 ```
 
+### Android Studio Setup
+
+#### Installation (Apple Silicon M4)
+1. **Download Android Studio**: Get the Apple Silicon version from https://developer.android.com/studio
+2. **Install**: Drag to Applications folder and run first-time setup wizard
+3. **SDK Components**: Ensure these are installed via SDK Manager:
+   - Android 14 (API 34) - for targetSdk
+   - Android 11 (API 30) - for minSdk
+   - Android SDK Build-Tools 34.0.0
+   - CMake (for native builds)
+   - NDK (Side by side) - version 26.1.10909125
+
+#### Project Setup
+1. **Open Project**: Use "Open" (not "Create New") and select the scrollguard directory
+2. **Initialize Submodules**: Run in Android Studio terminal:
+   ```bash
+   git submodule update --init --recursive
+   ```
+3. **Gradle Sync**: Android Studio will automatically sync the project
+4. **Build Configuration**: 
+   - Project Structure → SDK Location → verify JDK 17
+   - Gradle settings → Use gradle-wrapper.properties file
+
+#### Environment Integration
+- **Shell Profile**: Environment variables are configured in `~/.bash_profile`
+- **CLI Tools Compatibility**: Existing Homebrew Android platform tools (adb, fastboot) work seamlessly
+- **Gradle Integration**: Uses project wrapper (`./gradlew`) rather than system Gradle
+
+#### Development Workflow
+- **Build**: Use Build → Rebuild Project or the verified CLI commands
+- **Debug**: Can debug both Kotlin and native C++ code
+- **Emulator**: Create AVD with API 34, Pixel 7 or similar
+- **Device Testing**: Use existing adb connection to physical devices
+
 ## Architecture Overview
 
 ### Core Components
