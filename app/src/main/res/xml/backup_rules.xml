@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<full-backup-content>
+    <!-- Exclude sensitive data -->
+    <exclude domain="sharedpref" path="scrollguard_secure_prefs" />
+    <exclude domain="database" path="scrollguard_database" />
+    
+    <!-- Include app preferences -->
+    <include domain="sharedpref" path="." />
+    
+    <!-- Exclude temporary files -->
+    <exclude domain="file" path="models/" />
+    <exclude domain="cache" path="." />
+</full-backup-content>

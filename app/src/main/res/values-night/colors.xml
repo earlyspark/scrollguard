@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Material Design 3 Dark Theme Colors -->
+    <color name="md_theme_primary">#90CAF9</color>
+    <color name="md_theme_on_primary">#0D47A1</color>
+    <color name="md_theme_primary_container">#1565C0</color>
+    <color name="md_theme_on_primary_container">#E3F2FD</color>
+
+    <color name="md_theme_secondary">#80CBC4</color>
+    <color name="md_theme_on_secondary">#004D40</color>
+    <color name="md_theme_secondary_container">#00695C</color>
+    <color name="md_theme_on_secondary_container">#B2DFDB</color>
+
+    <color name="md_theme_tertiary">#FFB74D</color>
+    <color name="md_theme_on_tertiary">#E65100</color>
+    <color name="md_theme_tertiary_container">#F57C00</color>
+    <color name="md_theme_on_tertiary_container">#FFF3E0</color>
+
+    <color name="md_theme_error">#EF5350</color>
+    <color name="md_theme_on_error">#B71C1C</color>
+    <color name="md_theme_error_container">#C62828</color>
+    <color name="md_theme_on_error_container">#FFEBEE</color>
+
+    <color name="md_theme_background">#121212</color>
+    <color name="md_theme_on_background">#E0E0E0</color>
+
+    <color name="md_theme_surface">#1E1E1E</color>
+    <color name="md_theme_on_surface">#E0E0E0</color>
+    <color name="md_theme_surface_variant">#2C2C2C</color>
+    <color name="md_theme_on_surface_variant">#BDBDBD</color>
+
+    <color name="md_theme_outline">#616161</color>
+    <color name="md_theme_outline_variant">#424242</color>
+
+    <color name="md_theme_inverse_surface">#E0E0E0</color>
+    <color name="md_theme_inverse_on_surface">#121212</color>
+    <color name="md_theme_inverse_primary">#2196F3</color>
+
+    <!-- Overlay colors for dark theme -->
+    <color name="overlay_background">#CC000000</color>
+    <color name="filter_overlay">#E6000000</color>
+    <color name="blur_overlay">#80FFFFFF</color>
+
+    <!-- Status colors for dark theme -->
+    <color name="status_active">#66BB6A</color>
+    <color name="status_inactive">#757575</color>
+    <color name="status_error">#EF5350</color>
+    <color name="status_warning">#FFB74D</color>
+
+    <!-- Accessibility colors for dark theme -->
+    <color name="high_contrast_primary">#90CAF9</color>
+    <color name="high_contrast_secondary">#80CBC4</color>
+    <color name="high_contrast_background">#000000</color>
+    <color name="high_contrast_surface">#1E1E1E</color>
+</resources>

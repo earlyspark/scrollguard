@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<accessibility-service 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:description="@string/accessibility_service_description"
+    android:packageNames="com.instagram.android,com.zhiliaoapp.musically,com.twitter.android,com.reddit.frontpage,com.youtube.android,com.facebook.katana,com.snapchat.android,com.linkedin.android"
+    android:accessibilityEventTypes="typeWindowContentChanged|typeWindowStateChanged|typeViewScrolled|typeViewTextChanged"
+    android:accessibilityFlags="flagDefault|flagRequestAccessibilityButton|flagReportViewIds"
+    android:accessibilityFeedbackType="feedbackGeneric"
+    android:canRetrieveWindowContent="true"
+    android:canRequestFilterKeyEvents="false"
+    android:canPerformGestures="false"
+    android:settingsActivity="com.scrollguard.app.ui.activity.SettingsActivity" />

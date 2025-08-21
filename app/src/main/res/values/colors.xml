@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Material Design 3 Light Theme Colors -->
+    <color name="md_theme_primary">#2196F3</color>
+    <color name="md_theme_on_primary">#FFFFFF</color>
+    <color name="md_theme_primary_container">#E3F2FD</color>
+    <color name="md_theme_on_primary_container">#0D47A1</color>
+
+    <color name="md_theme_secondary">#03DAC6</color>
+    <color name="md_theme_on_secondary">#000000</color>
+    <color name="md_theme_secondary_container">#B2DFDB</color>
+    <color name="md_theme_on_secondary_container">#004D40</color>
+
+    <color name="md_theme_tertiary">#FF9800</color>
+    <color name="md_theme_on_tertiary">#000000</color>
+    <color name="md_theme_tertiary_container">#FFF3E0</color>
+    <color name="md_theme_on_tertiary_container">#E65100</color>
+
+    <color name="md_theme_error">#F44336</color>
+    <color name="md_theme_on_error">#FFFFFF</color>
+    <color name="md_theme_error_container">#FFEBEE</color>
+    <color name="md_theme_on_error_container">#B71C1C</color>
+
+    <color name="md_theme_background">#FAFAFA</color>
+    <color name="md_theme_on_background">#1C1B1F</color>
+
+    <color name="md_theme_surface">#FFFFFF</color>
+    <color name="md_theme_on_surface">#1C1B1F</color>
+    <color name="md_theme_surface_variant">#F5F5F5</color>
+    <color name="md_theme_on_surface_variant">#424242</color>
+
+    <color name="md_theme_outline">#BDBDBD</color>
+    <color name="md_theme_outline_variant">#E0E0E0</color>
+
+    <color name="md_theme_inverse_surface">#313033</color>
+    <color name="md_theme_inverse_on_surface">#F4EFF4</color>
+    <color name="md_theme_inverse_primary">#90CAF9</color>
+
+    <!-- Semantic colors -->
+    <color name="success">#4CAF50</color>
+    <color name="warning">#FF9800</color>
+    <color name="info">#2196F3</color>
+
+    <!-- Overlay colors -->
+    <color name="overlay_background">#CC000000</color>
+    <color name="filter_overlay">#E6FFFFFF</color>
+    <color name="blur_overlay">#80000000</color>
+
+    <!-- Status colors -->
+    <color name="status_active">#4CAF50</color>
+    <color name="status_inactive">#9E9E9E</color>
+    <color name="status_error">#F44336</color>
+    <color name="status_warning">#FF9800</color>
+
+    <!-- Accessibility colors -->
+    <color name="high_contrast_primary">#0D47A1</color>
+    <color name="high_contrast_secondary">#004D40</color>
+    <color name="high_contrast_background">#FFFFFF</color>
+    <color name="high_contrast_surface">#F5F5F5</color>
+</resources>
