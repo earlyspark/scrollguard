@@ -117,7 +117,11 @@ object NotificationHelper {
             .setOnlyAlertOnce(true)
             .build()
 
-        notificationManager.notify(NOTIFICATION_DOWNLOAD, notification)
+        try {
+            notificationManager.notify(NOTIFICATION_DOWNLOAD, notification)
+        } catch (se: SecurityException) {
+            // Missing POST_NOTIFICATIONS permission on Android 13+
+        }
     }
 
     /**
@@ -140,7 +144,11 @@ object NotificationHelper {
             .setAutoCancel(true)
             .build()
 
-        notificationManager.notify(NOTIFICATION_DOWNLOAD, notification)
+        try {
+            notificationManager.notify(NOTIFICATION_DOWNLOAD, notification)
+        } catch (se: SecurityException) {
+            // Missing POST_NOTIFICATIONS permission on Android 13+
+        }
     }
 
     /**
@@ -166,7 +174,11 @@ object NotificationHelper {
             builder.setContentIntent(pendingIntent)
         }
 
-        notificationManager.notify(NOTIFICATION_ERROR, builder.build())
+        try {
+            notificationManager.notify(NOTIFICATION_ERROR, builder.build())
+        } catch (se: SecurityException) {
+            // Missing POST_NOTIFICATIONS permission on Android 13+
+        }
     }
 
     /**

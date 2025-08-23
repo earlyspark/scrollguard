@@ -149,4 +149,5 @@
     
     <!-- Missing Resources -->
     <string name="filter_overlay_background">Content Filter Overlay</string>
+    <string name="permission_notifications_denied">Notification permission denied</string>
 </resources>

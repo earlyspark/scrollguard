@@ -48,7 +48,12 @@ class LLMInferenceService : Service() {
         Timber.d("LLMInferenceService started")
         
         val notification = createForegroundNotification()
-        startForeground(NOTIFICATION_ID, notification)
+        try {
+            startForeground(NOTIFICATION_ID, notification)
+        } catch (se: SecurityException) {
+            // Handle cases where POST_NOTIFICATIONS is not granted on Android 13+
+            Timber.w(se, "Unable to start foreground with notification: missing permission")
+        }
         
         return START_STICKY // Restart if killed
     }
@@ -114,6 +119,10 @@ class LLMInferenceService : Service() {
             .build()
 
         val notificationManager = getSystemService(NotificationManager::class.java)
-        notificationManager.notify(NOTIFICATION_ID, notification)
+        try {
+            notificationManager.notify(NOTIFICATION_ID, notification)
+        } catch (se: SecurityException) {
+            Timber.w(se, "Unable to update notification: missing permission")
+        }
     }
 }

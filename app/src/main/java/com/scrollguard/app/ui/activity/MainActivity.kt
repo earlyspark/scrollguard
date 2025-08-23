@@ -1,10 +1,15 @@
 package com.scrollguard.app.ui.activity
 
+import android.Manifest
 import android.content.Intent
 import android.os.Bundle
 import android.provider.Settings
+import android.content.pm.PackageManager
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.scrollguard.app.R
@@ -24,6 +29,18 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var app: ScrollGuardApplication
+    private var accessibilityDialogShown = false
+    
+    private val requestNotificationPermission =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            if (!granted) {
+                Snackbar.make(
+                    binding.root,
+                    R.string.permission_notifications_denied,
+                    Snackbar.LENGTH_LONG
+                ).show()
+            }
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,6 +58,11 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        // When returning from settings, check if accessibility is now enabled
+        if (AccessibilityHelper.isServiceEnabled(this)) {
+            accessibilityDialogShown = false
+        }
+        ensureNotificationPermission()
         updateUI()
         updateServiceStatus()
     }
@@ -115,13 +137,34 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateUI() {
-        // Check accessibility permission
-        if (!AccessibilityHelper.isServiceEnabled(this)) {
+        val isEnabled = AccessibilityHelper.isServiceEnabled(this)
+        Timber.d("ScrollGuard: Accessibility service enabled: $isEnabled, dialog shown: $accessibilityDialogShown")
+        
+        // Check accessibility permission (but don't show dialog repeatedly)
+        if (!isEnabled && !accessibilityDialogShown) {
+            Timber.d("ScrollGuard: Showing accessibility dialog")
             showAccessibilityPermissionDialog()
+        } else if (isEnabled) {
+            // Reset flag if accessibility is now enabled
+            accessibilityDialogShown = false
+            Timber.d("ScrollGuard: Accessibility enabled, resetting dialog flag")
         }
 
         // Update model status
         updateModelStatus()
+    }
+
+    private fun ensureNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val granted = ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+
+            if (!granted) {
+                requestNotificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
     }
 
     private fun updateServiceStatus() {
@@ -169,14 +212,20 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showAccessibilityPermissionDialog() {
+        accessibilityDialogShown = true
         MaterialAlertDialogBuilder(this)
             .setTitle(R.string.permission_accessibility_title)
             .setMessage(R.string.permission_accessibility_message)
             .setPositiveButton(R.string.permission_accessibility_button) { _, _ ->
                 openAccessibilitySettings()
             }
-            .setNegativeButton(R.string.cancel, null)
-            .setCancelable(false)
+            .setNegativeButton(R.string.cancel) { _, _ ->
+                accessibilityDialogShown = false
+            }
+            .setCancelable(true)
+            .setOnCancelListener {
+                accessibilityDialogShown = false
+            }
             .show()
     }
 

@@ -29,13 +29,22 @@ class ModelDownloadManager(private val context: Context) {
         // Available models - using small models suitable for mobile
         val AVAILABLE_MODELS = listOf(
             ModelInfo(
+                id = "qwen2-0.5b-q4",
+                name = "Qwen2 0.5B (Recommended)",
+                description = "Lightweight model optimized for mobile devices",
+                filename = "qwen2-0_5b-instruct-q4_k_m.gguf",
+                url = "https://huggingface.co/Qwen/Qwen2-0.5B-Instruct-GGUF/resolve/main/qwen2-0_5b-instruct-q4_k_m.gguf",
+                sizeMB = 350, // ~350MB
+                isRecommended = true
+            ),
+            ModelInfo(
                 id = "phi-3.5-mini-q4",
-                name = "Phi-3.5 Mini (Recommended)",
+                name = "Phi-3.5 Mini (Large)",
                 description = "Microsoft's small model optimized for mobile devices",
                 filename = "Phi-3.5-mini-instruct-Q4_K_M.gguf",
                 url = "https://huggingface.co/microsoft/Phi-3.5-mini-instruct-gguf/resolve/main/Phi-3.5-mini-instruct-Q4_K_M.gguf",
                 sizeMB = 2400, // ~2.4GB
-                isRecommended = true
+                isRecommended = false
             ),
             ModelInfo(
                 id = "qwen2-0.5b-q4",

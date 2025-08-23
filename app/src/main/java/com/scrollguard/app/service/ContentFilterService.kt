@@ -41,7 +41,7 @@ class ContentFilterService : AccessibilityService() {
         private val SUPPORTED_PACKAGES = setOf(
             "com.instagram.android",
             "com.zhiliaoapp.musically", // TikTok
-            "com.twitter.android",
+            "com.twitter.android", // Twitter/X
             "com.reddit.frontpage",
             "com.youtube.android",
             "com.facebook.katana",
@@ -59,7 +59,13 @@ class ContentFilterService : AccessibilityService() {
     
     private val handler = Handler(Looper.getMainLooper())
     private val contentCache = ConcurrentHashMap<String, ContentAnalysis>()
-    private val activeOverlays = ConcurrentHashMap<AccessibilityNodeInfo, View>()
+    private val activeOverlays = ConcurrentHashMap<AccessibilityNodeInfo, OverlayInfo>()
+    
+    private data class OverlayInfo(
+        val overlay: View,
+        val layoutParams: WindowManager.LayoutParams,
+        val contentBounds: android.graphics.Rect
+    )
     
     private var isServiceEnabled = false
     private var processingQueue = mutableListOf<ContentProcessingTask>()
@@ -107,6 +113,10 @@ class ContentFilterService : AccessibilityService() {
 
     override fun onInterrupt() {
         Timber.w("ContentFilterService interrupted")
+        
+        // Clear overlays immediately on interruption
+        clearAllOverlays()
+        
         analyticsManager.logEvent("accessibility_service_interrupted")
     }
 
@@ -125,7 +135,11 @@ class ContentFilterService : AccessibilityService() {
         
         // Only process events from supported social media apps
         val packageName = event.packageName?.toString()
+        Timber.d("ScrollGuard: Accessibility event from $packageName")
+        
         if (packageName !in SUPPORTED_PACKAGES) return
+        
+        Timber.d("ScrollGuard: Processing event from supported app: $packageName")
         
         when (event.eventType) {
             AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED,
@@ -139,6 +153,11 @@ class ContentFilterService : AccessibilityService() {
     }
 
     private fun handleContentChanged(event: AccessibilityEvent) {
+        // Update overlay positions on scroll events
+        if (event.eventType == AccessibilityEvent.TYPE_VIEW_SCROLLED) {
+            updateOverlayPositions()
+        }
+        
         // Debounce rapid content changes
         handler.removeCallbacksAndMessages(null)
         handler.postDelayed({
@@ -164,16 +183,29 @@ class ContentFilterService : AccessibilityService() {
         try {
             // Extract content nodes based on app type
             val contentNodes = when {
-                SocialMediaDetector.isInstagram(packageName) -> 
+                SocialMediaDetector.isInstagram(packageName) -> {
+                    Timber.d("ScrollGuard: Extracting Instagram content")
                     extractInstagramContent(rootNode)
-                SocialMediaDetector.isTikTok(packageName) -> 
+                }
+                SocialMediaDetector.isTikTok(packageName) -> {
+                    Timber.d("ScrollGuard: Extracting TikTok content")
                     extractTikTokContent(rootNode)
-                SocialMediaDetector.isTwitter(packageName) -> 
+                }
+                SocialMediaDetector.isTwitter(packageName) -> {
+                    Timber.d("ScrollGuard: Extracting Twitter content")
                     extractTwitterContent(rootNode)
-                SocialMediaDetector.isReddit(packageName) -> 
+                }
+                SocialMediaDetector.isReddit(packageName) -> {
+                    Timber.d("ScrollGuard: Extracting Reddit content")
                     extractRedditContent(rootNode)
-                else -> extractGenericContent(rootNode)
+                }
+                else -> {
+                    Timber.d("ScrollGuard: Extracting generic content")
+                    extractGenericContent(rootNode)
+                }
             }
+            
+            Timber.d("ScrollGuard: Found ${contentNodes.size} content nodes to analyze")
             
             // Process each content node
             contentNodes.forEach { node ->
@@ -377,21 +409,21 @@ class ContentFilterService : AccessibilityService() {
             node.getBoundsInScreen(bounds)
             
             val layoutParams = WindowManager.LayoutParams(
-                bounds.width(),
-                bounds.height(),
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.WRAP_CONTENT,
                 WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY,
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
-                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                 PixelFormat.TRANSLUCENT
             ).apply {
+                // Position relative to the actual content bounds
                 gravity = Gravity.TOP or Gravity.START
-                x = bounds.left
-                y = bounds.top
+                x = bounds.right - 140 // Position near right edge of content
+                y = bounds.top + 5 // Small offset from content top
             }
             
             // Add overlay to window
             windowManager.addView(overlay, layoutParams)
-            activeOverlays[node] = overlay
+            activeOverlays[node] = OverlayInfo(overlay, layoutParams, android.graphics.Rect(bounds))
             
             // Auto-remove overlay after some time
             handler.postDelayed({
@@ -423,19 +455,57 @@ class ContentFilterService : AccessibilityService() {
     }
 
     private fun removeOverlay(node: AccessibilityNodeInfo) {
-        activeOverlays.remove(node)?.let { overlay ->
+        activeOverlays.remove(node)?.let { overlayInfo ->
             try {
-                windowManager.removeView(overlay)
+                windowManager.removeView(overlayInfo.overlay)
             } catch (e: Exception) {
                 Timber.w(e, "Error removing overlay")
             }
         }
     }
 
+    private fun updateOverlayPositions() {
+        try {
+            val overlaysToUpdate = mutableListOf<Pair<AccessibilityNodeInfo, OverlayInfo>>()
+            
+            // Collect overlays that need position updates
+            activeOverlays.forEach { (node, overlayInfo) ->
+                val currentBounds = android.graphics.Rect()
+                node.getBoundsInScreen(currentBounds)
+                
+                // Check if the content has moved
+                if (currentBounds != overlayInfo.contentBounds) {
+                    overlaysToUpdate.add(node to overlayInfo)
+                }
+            }
+            
+            // Update positions for moved content
+            overlaysToUpdate.forEach { (node, overlayInfo) ->
+                val newBounds = android.graphics.Rect()
+                node.getBoundsInScreen(newBounds)
+                
+                // Update layout parameters
+                overlayInfo.layoutParams.x = newBounds.right - 140
+                overlayInfo.layoutParams.y = newBounds.top + 5
+                
+                // Update the overlay position
+                windowManager.updateViewLayout(overlayInfo.overlay, overlayInfo.layoutParams)
+                
+                // Update stored bounds
+                overlayInfo.contentBounds.set(newBounds)
+                
+                Timber.v("Updated overlay position for content at ${newBounds.top}")
+            }
+            
+        } catch (e: Exception) {
+            Timber.w(e, "Error updating overlay positions")
+        }
+    }
+
     private fun clearAllOverlays() {
-        activeOverlays.values.forEach { overlay ->
+        activeOverlays.values.forEach { overlayInfo ->
             try {
-                windowManager.removeView(overlay)
+                windowManager.removeView(overlayInfo.overlay)
             } catch (e: Exception) {
                 Timber.w(e, "Error removing overlay during cleanup")
             }

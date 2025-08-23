@@ -4,8 +4,9 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowManager
+import android.widget.Button
 import androidx.fragment.app.FragmentActivity
-import com.scrollguard.app.databinding.ContentFilterOverlayBinding
+import com.scrollguard.app.R
 import com.scrollguard.app.ui.dialog.ContentFeedbackDialogFragment
 import timber.log.Timber
 
@@ -20,7 +21,6 @@ class ContentOverlayManager(private val context: Context) {
 
     data class OverlayInfo(
         val view: View,
-        val binding: ContentFilterOverlayBinding,
         val params: WindowManager.LayoutParams,
         val analysisId: Long
     )
@@ -41,26 +41,15 @@ class ContentOverlayManager(private val context: Context) {
             // Remove existing overlay if present
             hideContentOverlay(contentId)
 
-            val binding = ContentFilterOverlayBinding.inflate(LayoutInflater.from(context))
-            
-            // Set overlay content
-            binding.filterReason.text = reason
-            
-            // Set up feedback buttons
-            binding.feedbackYesButton.setOnClickListener {
-                provideFeedback(analysisId, isPositive = true)
-                hideContentOverlay(contentId)
-            }
-            
-            binding.feedbackNoButton.setOnClickListener {
-                provideFeedback(analysisId, isPositive = false)
-                hideContentOverlay(contentId)
-            }
+            // Inflate the overlay layout
+            val overlayView = LayoutInflater.from(context).inflate(R.layout.content_filter_overlay, null)
             
             // Set up show content button
-            binding.showContentButton.setOnClickListener {
+            val showButton = overlayView.findViewById<Button>(R.id.show_content_button)
+            showButton.setOnClickListener {
                 hideContentOverlay(contentId)
-                // TODO: Implement content showing logic
+                // Content is revealed by removing the overlay
+                Timber.d("Content revealed for: $contentId")
             }
 
             // Create window parameters
@@ -77,10 +66,10 @@ class ContentOverlayManager(private val context: Context) {
             }
 
             // Add overlay to window
-            windowManager.addView(binding.root, params)
+            windowManager.addView(overlayView, params)
             
             // Store overlay info
-            activeOverlays[contentId] = OverlayInfo(binding.root, binding, params, analysisId)
+            activeOverlays[contentId] = OverlayInfo(overlayView, params, analysisId)
             
             Timber.d("Content overlay shown for: $contentId")
 

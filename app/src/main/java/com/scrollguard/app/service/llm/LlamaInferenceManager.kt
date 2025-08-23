@@ -16,7 +16,7 @@ import java.util.concurrent.ConcurrentHashMap
 class LlamaInferenceManager(private val context: Context) {
 
     companion object {
-        private const val MODEL_FILENAME = "scrollguard-model.gguf"
+        private const val MODEL_FILENAME = "qwen2-0_5b-instruct-q4_k_m.gguf"
         private const val DEFAULT_N_CTX = 2048
         private const val DEFAULT_N_THREADS = 4
         private const val DEFAULT_TEMPERATURE = 0.1f

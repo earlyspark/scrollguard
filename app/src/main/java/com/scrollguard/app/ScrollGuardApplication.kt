@@ -7,6 +7,7 @@ import com.scrollguard.app.data.repository.ContentRepository
 import com.scrollguard.app.data.repository.PreferencesRepository
 import com.scrollguard.app.service.analytics.AnalyticsManager
 import com.scrollguard.app.service.llm.LlamaInferenceManager
+import com.scrollguard.app.service.llm.ModelDownloadManager
 import com.scrollguard.app.util.ErrorHandler
 import com.scrollguard.app.ui.util.NotificationHelper
 import timber.log.Timber
@@ -59,6 +60,10 @@ class ScrollGuardApplication : Application() {
         LlamaInferenceManager(applicationContext)
     }
 
+    val modelDownloadManager by lazy {
+        ModelDownloadManager(applicationContext)
+    }
+
     // Error Handler
     val errorHandler by lazy {
         ErrorHandler(applicationContext, analyticsManager)
@@ -67,11 +72,12 @@ class ScrollGuardApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         
-        // Set up global exception handler
+        // Set up global exception handler (avoid recursion by delegating to previous handler)
+        val previousHandler = Thread.getDefaultUncaughtExceptionHandler()
         Thread.setDefaultUncaughtExceptionHandler { thread, exception ->
             errorHandler.reportCriticalError(exception, "UncaughtException", thread.name)
-            // Let the system handle the crash
-            Thread.getDefaultUncaughtExceptionHandler()?.uncaughtException(thread, exception)
+            // Delegate to the original handler so the system can crash/report properly
+            previousHandler?.uncaughtException(thread, exception)
         }
         
         // Initialize logging

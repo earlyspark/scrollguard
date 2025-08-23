@@ -79,24 +79,45 @@ class ModelDownloadDialogFragment : DialogFragment() {
         
         lifecycleScope.launch {
             try {
-                // Initialize inference manager
-                updateProgress(getString(R.string.downloading), 10)
-                val initialized = app.llamaInferenceManager.initialize()
+                // Get the recommended model to download
+                val modelDownloadManager = app.modelDownloadManager
+                val recommendedModel = modelDownloadManager.getRecommendedModel()
                 
-                if (!initialized) {
-                    showError(getString(R.string.error_model_load))
+                // Check if model is already downloaded
+                if (modelDownloadManager.isModelDownloaded(recommendedModel)) {
+                    updateProgress("Model already exists, loading...", 50)
+                    val loaded = app.llamaInferenceManager.loadModel()
+                    if (loaded) {
+                        updateProgress(getString(R.string.download_complete), 100)
+                        onDownloadSuccess()
+                    } else {
+                        showError(getString(R.string.error_model_load))
+                    }
                     return@launch
                 }
                 
-                // Load model
-                updateProgress(getString(R.string.downloading), 50)
-                val loaded = app.llamaInferenceManager.loadModel()
+                // Start actual download
+                updateProgress("Starting download...", 5)
+                val downloadSuccess = modelDownloadManager.downloadModel(recommendedModel)
                 
-                if (loaded) {
-                    updateProgress(getString(R.string.download_complete), 100)
-                    onDownloadSuccess()
+                if (downloadSuccess) {
+                    // Initialize inference manager after download
+                    updateProgress("Initializing AI engine...", 90)
+                    val initialized = app.llamaInferenceManager.initialize()
+                    
+                    if (initialized) {
+                        val loaded = app.llamaInferenceManager.loadModel()
+                        if (loaded) {
+                            updateProgress(getString(R.string.download_complete), 100)
+                            onDownloadSuccess()
+                        } else {
+                            showError(getString(R.string.error_model_load))
+                        }
+                    } else {
+                        showError("Failed to initialize AI engine")
+                    }
                 } else {
-                    showError(getString(R.string.error_model_load))
+                    showError(getString(R.string.download_failed))
                 }
                 
             } catch (e: Exception) {
